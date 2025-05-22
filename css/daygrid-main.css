@@ -1,0 +1,196 @@
+/* FullCalendar Day Grid Plugin v6.1.17
+Docs & License: https://www.google.com/search?q=https://fullcalendar.io/docs/daygrid-plugin
+(c) 2023 FullCalendar Inc.
+*/
+.fc .fc-daygrid-body-unbalanced .fc-daygrid-row:not(:last-child) {
+overflow: hidden;
+}
+.fc .fc-daygrid-body-unbalanced .fc-daygrid-row:not(:last-child) .fc-daygrid-event-harness {
+-webkit-box-pack: start;
+-ms-flex-pack: start;
+justify-content: flex-start;
+}
+.fc-direction-ltr .fc-daygrid-event.fc-event-end,
+.fc-direction-rtl .fc-daygrid-event.fc-event-start {
+margin-right: 2px;
+}
+.fc-direction-ltr .fc-daygrid-event.fc-event-start,
+.fc-direction-rtl .fc-daygrid-event.fc-event-end {
+margin-left: 2px;
+}
+.fc-direction-ltr .fc-daygrid-more-link {
+margin-right: 2px;
+}
+.fc-direction-rtl .fc-daygrid-more-link {
+margin-left: 2px;
+}
+.fc .fc-daygrid-event-harness {
+position: relative;
+}
+.fc .fc-daygrid-event-harness-abs {
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+}
+.fc-daygrid-event.fc-event-mirror {
+background-color: transparent;
+border-color: transparent;
+color: #000;
+}
+.fc-daygrid-event.fc-event-mirror .fc-event-time,
+.fc-daygrid-event.fc-event-mirror .fc-event-title {
+background-color: rgba(212, 212, 212, 0.3);
+border-color: rgba(184, 184, 184, 0.3);
+padding: 0 1px;
+}
+.fc-daygrid-dot-event .fc-event-title {
+padding: 0 2px;
+}
+.fc-daygrid-dot-event .fc-event-time {
+display: inline-block;
+padding: 0 2px;
+}
+.fc-daygrid-day-number {
+position: relative;
+top: -1px;
+min-height: 12px;
+min-width: 12px;
+text-align: center;
+font-size: 0.7692307692em;
+padding: 3px 3px;
+}
+.fc-direction-ltr .fc-daygrid-day-number {
+text-align: left;
+}
+.fc-direction-rtl .fc-daygrid-day-number {
+text-align: right;
+}
+.fc-media-screen .fc-daygrid-day-number {
+padding-bottom: 4px;
+}
+.fc-daygrid-event {
+position: relative;
+white-space: nowrap;
+border-radius: 3px;
+font-size: 0.85em;
+border: 1px solid #3788d8;
+background-color: #3788d8;
+color: #fff;
+}
+.fc-daygrid-event:hover {
+text-decoration: none;
+}
+.fc-daygrid-event .fc-event-time {
+white-space: nowrap;
+padding: 0 1px;
+}
+.fc-daygrid-event .fc-event-title {
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+padding: 0 1px;
+}
+.fc-daygrid-event.fc-event-mirror {
+background-color: rgba(212, 212, 212, 0.3);
+border-color: rgba(184, 184, 184, 0.3);
+}
+.fc-daygrid-event.fc-event-mirror .fc-event-time,
+.fc-daygrid-event.fc-event-mirror .fc-event-title {
+background-color: transparent;
+border-color: transparent;
+color: #000;
+}
+.fc-daygrid-event.fc-event-selected {
+background-color: #d2d2d2;
+border-color: #d2d2d2;
+}
+.fc-daygrid-block-event {
+display: -webkit-box;
+display: -ms-flexbox;
+display: flex;
+-webkit-box-align: center;
+-ms-flex-align: center;
+align-items: center;
+-webkit-box-pack: start;
+-ms-flex-pack: start;
+justify-content: flex-start;
+max-width: 100%;
+margin: 0 2px;
+padding: 1px 0;
+}
+.fc-daygrid-block-event .fc-event-time {
+margin: 0 3px;
+}
+.fc-daygrid-block-event .fc-event-title {
+-webkit-box-flex: 1;
+-ms-flex-positive: 1;
+flex-grow: 1;
+-ms-flex-negative: 1;
+flex-shrink: 1;
+min-width: 0;
+overflow: hidden;
+font-weight: bold;
+}
+.fc-daygrid-block-event .fc-event-time,
+.fc-daygrid-block-event .fc-event-title {
+color: #fff;
+}
+.fc-daygrid-more-link {
+position: relative;
+font-size: 0.85em;
+cursor: pointer;
+text-decoration: none;
+color: inherit;
+border-radius: 2px;
+padding: 1px 2px;
+}
+.fc-daygrid-more-link:hover {
+background-color: #eee;
+}
+.fc-popover .fc-daygrid-more-link {
+display: block;
+margin: 0 2px 2px;
+}
+.fc-popover-header {
+min-width: 180px;
+}
+.fc-popover-header .fc-popover-title {
+font-size: 1.2em;
+}
+.fc-popover-body {
+padding: 10px;
+}
+.fc-daygrid-day-events {
+position: relative;
+z-index: 1;
+}
+.fc-daygrid-day-frame {
+position: relative;
+min-height: 70px;
+}
+.fc-daygrid-day-events .fc-daygrid-event-harness {
+margin-top: 2px;
+}
+.fc-daygrid-day-bottom {
+position: absolute;
+bottom: 0;
+left: 0;
+width: 100%;
+}
+.fc-daygrid-day-top {
+position: relative;
+}
+.fc-daygrid-day-bottom .fc-daygrid-day-number {
+padding-bottom: 2px;
+}
+.fc .fc-daygrid-day.fc-day-other {
+background-color: #f2f2f2;
+opacity: 0.7;
+}
+.fc .fc-daygrid-day.fc-day-today {
+background-color: rgba(255, 220, 40, 0.15);
+}
+.fc-h-event {
+display: block;
+}

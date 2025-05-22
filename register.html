@@ -4,35 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Blood Pressure Tracker</title>
-    <link rel="stylesheet" href="css/register.css">
-    
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="register-container">
-        <h2>Register for an Account</h2>
-        <form id="registerForm">
-            <div class="input-group">
-                <label for="reg_username">Username:</label>
-                <input type="text" id="reg_username" name="username" required>
-            </div>
-            <div class="input-group">
-                <label for="reg_email">Email (Optional):</label>
-                <input type="email" id="reg_email" name="email">
-            </div>
-            <div class="input-group">
-                <label for="reg_password">Password:</label>
-                <input type="password" id="reg_password" name="password" required>
-            </div>
-            <div class="input-group">
-                <label for="reg_confirm_password">Confirm Password:</label>
-                <input type="password" id="reg_confirm_password" name="confirm_password" required>
-            </div>
-            <button type="submit">Register</button>
-        </form>
-        <div id="registerMessage" class="message"></div>
-        <p>Already have an account? <a href="login.html">Login here</a></p>
+    <div class="container">
+        <div class="login-register-form">
+            <h2>Register</h2>
+            <form id="registerForm">
+                <input type="text" id="reg_username" placeholder="Username" required>
+                <input type="password" id="reg_password" placeholder="Password" required>
+                <input type="password" id="reg_confirm_password" placeholder="Confirm Password" required>
+                <button type="submit">Register</button>
+                <p id="registerMessage" class="message"></p>
+            </form>
+            <p>Already have an account? <a href="login.html">Login here</a></p>
+        </div>
     </div>
-
     <script src="javascript/register.js"></script>
 </body>
 </html>

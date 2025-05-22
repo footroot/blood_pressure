@@ -1,0 +1,20 @@
+body {
+    font-family: sans-serif;
+    margin: 20px;
+}
+
+input[type="number"] {
+    width: 80px;
+    padding: 7px;
+    font-size: 20px;
+    border: 1px solid #a39b9b;
+    border-radius: 4px;
+    background-color: #f3f0ee;
+    overflow: hidden;
+}
+
+.input-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}

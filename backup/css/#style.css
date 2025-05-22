@@ -1,0 +1,86 @@
+body {
+    font-family: sans-serif;
+    margin: 20px;
+}
+
+input[type="number"] {
+    width: 80px;
+    padding: 7px;
+    font-size: 20px;
+    border: 1px solid #a39b9b;
+    border-radius: 4px;
+    background-color: #f3f0ee;
+    overflow: hidden;
+}
+
+.input-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+/* style.css */
+
+/* Apply flexbox to the new container for larger screens */
+.main-content-layout {
+    display: flex; /* Enables flexbox layout */
+    flex-wrap: wrap; /* Allows items to wrap to the next line on smaller screens */
+    justify-content: space-between; /* Puts space between items */
+    align-items: flex-start; /* Aligns items to the top */
+    gap: 20px; /* Space between calendar and list */
+    margin: 20px; /* Add some margin around the whole layout */
+}
+
+#calendar-section {
+    flex: 1; /* Allows calendar to grow and shrink */
+    min-width: 300px; /* Minimum width before wrapping */
+    max-width: 60%; /* Occupy up to 60% on large screens */
+    /* You can adjust max-width to exactly 50% if you prefer,
+       but allowing a bit more flexibility (e.g., 60%) can look better if the list is short. */
+}
+
+#list-section {
+    flex: 1; /* Allows list to grow and shrink */
+    min-width: 250px; /* Minimum width before wrapping */
+    max-width: 38%; /* Occupy up to 38% (60% + 38% = 98%, leaving room for gap) */
+}
+
+/* Media Queries for smaller screens (stacking them) */
+@media (max-width: 992px) { /* Adjust breakpoint as needed for when they should stack */
+    .main-content-layout {
+        flex-direction: column; /* Stack calendar and list vertically */
+        align-items: center; /* Center them when stacked */
+    }
+    #calendar-section,
+    #list-section {
+        width: 90%; /* Take up more width when stacked */
+        max-width: none; /* Remove max-width constraint */
+        margin-bottom: 20px; /* Add space between stacked items */
+    }
+}
+
+#chart-section {
+    position: relative; /* Important for Chart.js responsiveness */
+    width: 80%; /* Default width for desktop */
+    margin: 20px auto; /* Center it */
+    max-width: 900px; /* Prevent it from getting too wide on huge screens */
+}
+
+/* Media queries for smaller screens */
+
+/* For Tablets (e.g., up to 768px wide) */
+@media (max-width: 768px) {
+    #chart-section {
+        width: 90%; /* Make it wider for tablets */
+        margin: 15px auto;
+    }
+}
+
+/* For Phones (e.g., up to 480px wide) */
+@media (max-width: 480px) {
+    #chart-section {
+        width: 95%; /* Even wider for small phones */
+        margin: 10px auto;
+        /* height: 2vh; */
+    }
+}

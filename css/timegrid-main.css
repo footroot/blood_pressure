@@ -1,0 +1,105 @@
+.fc-timegrid-slot {
+height: 3em;
+}
+.fc-timegrid-slot-label,
+.fc-timegrid-slot-lane {
+vertical-align: top;
+}
+.fc-timegrid-slot-label {
+padding: 0 0 0 8px;
+}
+.fc-timegrid-slot-label-frame {
+white-space: nowrap;
+}
+.fc-timegrid-slot-label-cushion {
+padding: 0 2px;
+}
+.fc-timegrid-duration {
+padding: 0 2px;
+}
+.fc-timegrid-event {
+position: absolute;
+z-index: 1;
+}
+.fc-timegrid-event.fc-event-mirror {
+background-color: rgba(212, 212, 212, 0.3);
+border-color: rgba(184, 184, 184, 0.3);
+}
+.fc-timegrid-event.fc-event-mirror .fc-event-time,
+.fc-timegrid-event.fc-event-mirror .fc-event-title {
+background-color: transparent;
+border-color: transparent;
+color: #000;
+}
+.fc-timegrid-event.fc-event-selected {
+background-color: #d2d2d2;
+border-color: #d2d2d2;
+}
+.fc-timegrid-event-harness {
+height: 100%;
+}
+.fc-timegrid-event-harness > .fc-timegrid-event {
+height: 100%;
+}
+.fc-timegrid-col {
+position: relative;
+}
+.fc-timegrid-col-events {
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+}
+.fc-timegrid-col-events > .fc-timegrid-event-harness {
+position: absolute;
+top: 0;
+bottom: 0;
+}
+.fc-timegrid-col-events .fc-timegrid-event {
+overflow: hidden;
+}
+.fc-timegrid-col-events .fc-event-main {
+min-height: 100%;
+}
+.fc-timegrid-bg-event {
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+height: 100%;
+background: rgba(135, 135, 135, 0.2);
+}
+.fc-timegrid-now-indicator-line {
+position: absolute;
+z-index: 2;
+left: 0;
+right: 0;
+border-bottom: 1px solid red;
+}
+.fc-timegrid-now-indicator-arrow {
+position: absolute;
+z-index: 2;
+margin-top: -5px;
+width: 0;
+height: 0;
+border-top: 5px solid transparent;
+border-bottom: 5px solid transparent;
+border-left: 6px solid red;
+}
+.fc-timegrid-grid-sync {
+min-height: 2em;
+}
+.fc-timegrid-axis-frame {
+white-space: nowrap;
+height: 100%;
+}
+.fc-timegrid-axis-frame > div {
+display: inline-block;
+vertical-align: middle;
+}
+.fc-timegrid-axis-frame > div.fc-timegrid-slot-label-frame {
+height: 100%;
+}
+.fc-timegrid-axis-frame .fc-scrollgrid-shrink {
+width: 0 !important;
+}

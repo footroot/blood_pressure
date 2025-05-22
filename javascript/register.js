@@ -1,58 +1,77 @@
-document.getElementById('registerForm').addEventListener('submit', function (event) {
-    event.preventDefault(); // Prevent default form submission
-    const username = document.getElementById('reg_username').value;
-    const email = document.getElementById('reg_email').value;
-    const password = document.getElementById('reg_password').value;
-    const confirmPassword = document.getElementById('reg_confirm_password').value;
+document.addEventListener('DOMContentLoaded', function() {
+    const registerForm = document.getElementById('registerForm');
+    const usernameInput = document.getElementById('reg_username');
+    const passwordInput = document.getElementById('reg_password');
+    const confirmPasswordInput = document.getElementById('reg_confirm_password');
     const registerMessage = document.getElementById('registerMessage');
 
-    if (password !== confirmPassword) {
-        registerMessage.className = 'message error';
-        registerMessage.textContent = 'Passwords do not match!';
-        return;
-    }
+    if (registerForm) {
+        registerForm.addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent default form submission
 
-    // Basic password strength check (you can make this more robust)
+            registerMessage.textContent = ''; // Clear previous messages
+            registerMessage.className = 'message'; // Reset message class
 
-    if (password.length < 8) {
-        registerMessage.className = 'message error';
-        registerMessage.textContent = 'Password must be at least 8 characters long!';
-        return;
-    }
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
 
-
-    const formData = new FormData();
-    formData.append('username', username);
-    formData.append('email', email);
-    formData.append('password', password);
-
-    fetch('register.php', {
-        method: 'POST',
-        body: formData
-    })
-
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                registerMessage.className = 'message success';
-                registerMessage.textContent = data.message;
-                document.getElementById('registerForm').reset(); // Clear the form
-
-                // Optionally redirect to login page
-
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 2000); // Redirect after 2 seconds
-            } else {
-                registerMessage.className = 'message error';
-                registerMessage.textContent = data.message;
+            // Client-side validation (basic)
+            if (!username || !password || !confirmPassword) {
+                registerMessage.textContent = 'All fields are required.';
+                registerMessage.classList.add('error');
+                return;
             }
-        })
+            if (password !== confirmPassword) {
+                registerMessage.textContent = 'Passwords do not match.';
+                registerMessage.classList.add('error');
+                return;
+            }
+            if (password.length < 6) {
+                registerMessage.textContent = 'Password must be at least 6 characters long.';
+                registerMessage.classList.add('error');
+                return;
+            }
 
-        .catch(error => {
-            console.error('Error:', error);
-            registerMessage.className = 'message error';
-            registerMessage.textContent = 'An unexpected error occurred. Please try again.';
+            try {
+                const response = await fetch('register.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        username: username,
+                        password: password,
+                        confirm_password: confirmPassword
+                    }).toString()
+                });
+
+                const data = await response.json(); // Parse the JSON response from register.php
+
+                if (data.success) {
+                    registerMessage.textContent = data.message;
+                    registerMessage.classList.add('success');
+                    // Optionally clear form fields on success
+                    usernameInput.value = '';
+                    passwordInput.value = '';
+                    confirmPasswordInput.value = '';
+
+                    // Redirect to login page after a short delay
+                    if (data.redirect) {
+                        setTimeout(() => {
+                            window.location.href = data.redirect;
+                        }, 2000); // Redirect after 2 seconds
+                    }
+
+                } else {
+                    registerMessage.textContent = data.message;
+                    registerMessage.classList.add('error');
+                }
+            } catch (error) {
+                console.error('Error during registration:', error);
+                registerMessage.textContent = 'An unexpected error occurred. Please try again.';
+                registerMessage.classList.add('error');
+            }
         });
+    }
 });
-

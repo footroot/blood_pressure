@@ -1,73 +1,73 @@
 <?php
-require 'db_connect.php'; // Your existing database connection file
+// No session_start() needed here unless you immediately log the user in after registration,
+// but generally, it's better to redirect them to the login page.
+require 'db_connect.php'; // Include your database connection file
 
-header('Content-Type: application/json'); // Respond with JSON
+header('Content-Type: application/json'); // Set header to indicate JSON response
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
-    $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
 
     // Basic validation
-    if (empty($username) || empty($password)) {
-        echo json_encode(['success' => false, 'message' => 'Username and password are required.']);
+    if (empty($username) || empty($password) || empty($confirm_password)) {
+        echo json_encode(['success' => false, 'message' => 'All fields are required.']);
         exit;
     }
 
-    if (strlen($password) < 8) {
-        echo json_encode(['success' => false, 'message' => 'Password must be at least 8 characters long.']);
+    if ($password !== $confirm_password) {
+        echo json_encode(['success' => false, 'message' => 'Passwords do not match.']);
+        exit;
+    }
+
+    // Password strength (optional, but good practice)
+    if (strlen($password) < 6) {
+        echo json_encode(['success' => false, 'message' => 'Password must be at least 6 characters long.']);
         exit;
     }
 
     // Check if username already exists
     $stmt = $conn->prepare("SELECT id FROM users WHERE username = ?");
+    if (!$stmt) {
+        error_log("Register prepare failed: " . $conn->error);
+        echo json_encode(['success' => false, 'message' => 'Database error. Please try again later.']);
+        exit;
+    }
     $stmt->bind_param("s", $username);
     $stmt->execute();
-    $stmt->store_result();
+    $result = $stmt->get_result();
 
-    if ($stmt->num_rows > 0) {
-        echo json_encode(['success' => false, 'message' => 'Username already taken. Please choose a different one.']);
+    if ($result->num_rows > 0) {
+        echo json_encode(['success' => false, 'message' => 'Username already exists. Please choose a different one.']);
         $stmt->close();
-        $conn->close();
         exit;
     }
     $stmt->close();
 
-    // Check if email already exists (if provided)
-    if (!empty($email)) {
-        $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $stmt->store_result();
-
-        if ($stmt->num_rows > 0) {
-            echo json_encode(['success' => false, 'message' => 'Email already registered.']);
-            $stmt->close();
-            $conn->close();
-            exit;
-        }
-        $stmt->close();
-    }
-
-
-    // Hash the password securely using bcrypt
-    // PASSWORD_DEFAULT uses the strongest algorithm available (currently BCRYPT)
-    // and handles salting automatically.
+    // Hash the password securely
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
     // Insert new user into the database
-    $stmt = $conn->prepare("INSERT INTO users (username, password, email) VALUES (?, ?, ?)");
-    $stmt->bind_param("sss", $username, $hashed_password, $email);
+    $stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
+    if (!$stmt) {
+        error_log("Insert user prepare failed: " . $conn->error);
+        echo json_encode(['success' => false, 'message' => 'Failed to prepare user insertion.']);
+        exit;
+    }
+
+    $stmt->bind_param("ss", $username, $hashed_password);
 
     if ($stmt->execute()) {
-        echo json_encode(['success' => true, 'message' => 'Registration successful! You can now log in.']);
+        echo json_encode(['success' => true, 'message' => 'Registration successful! You can now login.', 'redirect' => 'login.html']);
     } else {
-        error_log("Registration error: " . $stmt->error); // Log the actual error for debugging
-        echo json_encode(['success' => false, 'message' => 'Registration failed. Please try again later.']);
+        error_log("User registration failed: " . $stmt->error);
+        echo json_encode(['success' => false, 'message' => 'Registration failed. Please try again.']);
     }
 
     $stmt->close();
 } else {
+    // Not a POST request
     echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
 }
 

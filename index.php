@@ -14,8 +14,10 @@ if (!isset($_SESSION['user_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blood Pressure Tracker</title>
+    <!-- <link rel="stylesheet" href="css/daygrid-main.css">
+    <link rel="stylesheet" href="css/timegrid-main.css"> -->
     <link rel="stylesheet" href="css/style.css">
-    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/main.css' rel='stylesheet' />
+    <!-- <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/main.css' rel='stylesheet' /> -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js'></script>
 </head>

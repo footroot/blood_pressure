@@ -40,4 +40,3 @@ echo json_encode($events);
 
 $stmt->close();
 $conn->close();
-?>

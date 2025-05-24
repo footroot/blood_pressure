@@ -1,13 +1,17 @@
-// Ensure all code runs after the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', function() {
+// script.js
 
+document.addEventListener('DOMContentLoaded', function() {
     // --- DOM Element References ---
-    // Input elements for adding readings (ensure these IDs match your HTML)
+    const addReadingForm = document.getElementById('addReadingForm'); // The form for adding readings
     const systolicInput = document.getElementById('systolic');
     const diastolicInput = document.getElementById('diastolic');
     const pulseInput = document.getElementById('pulse');
     const notesInput = document.getElementById('notes');
+    const readingDateInput = document.getElementById('reading_date'); // New: Date input
+    const addReadingMessage = document.getElementById('addReadingMessage'); // For messages
+
     const readingList = document.getElementById('reading-list'); // For displaying the list of readings
+    const logoutButton = document.getElementById('logoutButton'); // Logout button
 
     // Chart.js Initialization
     const bpChartCanvas = document.getElementById('bpChart');
@@ -17,6 +21,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const calendarEl = document.getElementById('calendar');
     let calendar; // Declare calendar variable to be accessible later
 
+
+    // --- Set default date for reading_date input to today ---
+    if (readingDateInput) {
+        readingDateInput.valueAsDate = new Date();
+    }
 
     // --- Chart.js Setup ---
     if (bpChartCanvas) {
@@ -62,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
+                maintainAspectRatio: false, // Allow chart to fill container better
                 backgroundColor: 'rgba(240, 248, 255, 0.5)',
                 borderColor: 'lightgray',
                 borderWidth: 1,
@@ -74,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         bottom: 0
                     }
                 },
-                plugins: { // Use 'plugins' for Chart.js v3+ options like title and legend
+                plugins: {
                     title: {
                         display: true,
                         text: 'Blood Pressure Trends Over Time',
@@ -100,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             usePointStyle: true
                         }
                     },
-                    tooltip: { // Use 'tooltip' for tooltips
+                    tooltip: {
                         enabled: true,
                         mode: 'nearest',
                         intersect: false,
@@ -143,7 +152,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-
     // --- FullCalendar Setup ---
     if (calendarEl) {
         calendar = new FullCalendar.Calendar(calendarEl, {
@@ -151,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
             events: function(fetchInfo, successCallback, failureCallback) {
                 fetch('get_calendar_events.php')
                 .then(response => {
-                    if (!response.ok) { // Check if response is OK
+                    if (!response.ok) {
                         throw new Error('Network response was not ok ' + response.statusText);
                     }
                     return response.json();
@@ -213,11 +221,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const totalSystolic = filteredReadings.reduce((sum, r) => sum + parseInt(r.systolic), 0);
         const totalDiastolic = filteredReadings.reduce((sum, r) => sum + parseInt(r.diastolic), 0);
-        const totalPulse = filteredReadings.reduce((sum, r) => sum + (parseInt(r.pulse) || 0), 0);
+        // Only include pulse in average if it's a valid number
+        const validPulses = filteredReadings.filter(r => r.pulse && !isNaN(parseInt(r.pulse)));
+        const totalPulse = validPulses.reduce((sum, r) => sum + parseInt(r.pulse), 0);
 
         const avgSystolic = (totalSystolic / filteredReadings.length).toFixed(0);
         const avgDiastolic = (totalDiastolic / filteredReadings.length).toFixed(0);
-        const avgPulse = (totalPulse / filteredReadings.length).toFixed(0);
+        const avgPulse = validPulses.length > 0 ? (totalPulse / validPulses.length).toFixed(0) : '--';
 
         return {
             systolic: avgSystolic,
@@ -229,7 +239,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Function to Update Chart.js Chart ---
     function updateChart(readings) {
-        const dates = readings.map(r => new Date(r.timestamp).toLocaleDateString());
+        // Sort readings by timestamp to ensure chronological order for the chart
+        readings.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+        const dates = readings.map(r => {
+            const d = new Date(r.timestamp);
+            return `${d.getMonth() + 1}/${d.getDate()}`; // MM/DD format
+        });
         const systolicData = readings.map(r => r.systolic);
         const diastolicData = readings.map(r => r.diastolic);
         const pulseData = readings.map(r => r.pulse);
@@ -243,26 +259,58 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 
-    // --- Main Function to Fetch and Display All Readings (List, Chart, Averages, Calendar) ---
+    // --- Function to Display All Readings (List, Chart, Averages, Calendar) ---
+    // Made global so it can be called from add_reading success
     window.fetchAndDisplayReadings = async function() {
         try {
             const response = await fetch('get_readings.php');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const readings = await response.json();
+            console.log("Fetched Readings:", readings); // For debugging
 
             // Display in list
             if (readingList) {
                 readingList.innerHTML = ''; // Clear previous readings
-                readings.forEach(reading => {
-                    const li = document.createElement('li');
-                    const date = new Date(reading.timestamp).toLocaleString();
-                    const category = getBpCategory(reading.systolic, reading.diastolic);
-                    li.classList.add('category-' + category.toLowerCase().replace(/ /g, '-'));
-                    li.textContent = `${date}: Systolic ${reading.systolic}, Diastolic ${reading.diastolic}, Pulse ${reading.pulse || '-'}`;
-                    if (reading.notes) {
-                        li.textContent += ` (Notes: ${reading.notes})`;
-                    }
-                    readingList.appendChild(li);
-                });
+                // Sort readings by timestamp descending (newest first) for the list
+                readings.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                if (readings.length === 0) {
+                    readingList.innerHTML = '<li class="no-readings">No readings yet. Add one above!</li>';
+                } else {
+                    readings.forEach(reading => {
+                        const li = document.createElement('li');
+                        // Format the timestamp for display
+                        const readingDateTime = new Date(reading.timestamp);
+                        const formattedDate = readingDateTime.toLocaleDateString();
+                        const formattedTime = readingDateTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                        const category = getBpCategory(reading.systolic, reading.diastolic);
+                        li.classList.add('reading-item');
+                        li.classList.add('category-' + category.toLowerCase().replace(/ /g, '-'));
+
+                        let readingText = `${formattedDate} ${formattedTime}: ${reading.systolic}/${reading.diastolic} mmHg`;
+                        if (reading.pulse && reading.pulse !== '0') { // Only add pulse if it's not empty or zero
+                            readingText += `, Pulse ${reading.pulse} bpm`;
+                        }
+                        if (reading.notes) {
+                            readingText += ` (Notes: ${reading.notes})`;
+                        }
+
+                        // Add delete button
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.textContent = 'Delete';
+                        deleteBtn.classList.add('delete-btn');
+                        deleteBtn.onclick = function() {
+                            deleteReading(reading.id);
+                        };
+
+                        li.innerHTML = `<span>${readingText}</span>`;
+                        li.appendChild(deleteBtn);
+                        readingList.appendChild(li);
+                    });
+                }
             }
 
             // Calculate and Display Averages
@@ -281,59 +329,140 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('avg-diastolic-alltime').textContent = avgAllTime.diastolic;
             document.getElementById('avg-pulse-alltime').textContent = avgAllTime.pulse;
 
-
             // Update chart if it's initialized
             if (bpChart) {
                 updateChart(readings);
             }
 
-            // Tell FullCalendar to refetch its events. This is key for updates!
-            if (calendar) { // Ensure calendar object exists
+            // Tell FullCalendar to refetch its events.
+            if (calendar) {
                 calendar.refetchEvents();
             }
 
         } catch (error) {
             console.error('Error fetching readings:', error);
+            // Optionally display a user-friendly error message
+            if (readingList) {
+                readingList.innerHTML = '<li class="error-message">Failed to load readings. Please try again.</li>';
+            }
         }
-    }
+    };
 
 
-    // --- Function to Add a New Reading ---
-    // (This function is made global so it can be called from the HTML button's onclick)
-    window.addReading = async function() {
-        const systolic = parseInt(systolicInput.value);
-        const diastolic = parseInt(diastolicInput.value);
-        const pulse = parseInt(pulseInput.value || 0); // Default to 0 if pulse is empty
-        const notes = notesInput.value;
+    // --- Event Listener for Adding a New Reading ---
+    if (addReadingForm) {
+        addReadingForm.addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent default form submission
 
-        if (!isNaN(systolic) && !isNaN(diastolic)) {
-            const newReading = { systolic, diastolic, pulse, notes };
+            addReadingMessage.textContent = ''; // Clear previous messages
+            addReadingMessage.className = 'message'; // Reset message class
+
+            const systolic = parseInt(systolicInput.value);
+            const diastolic = parseInt(diastolicInput.value);
+            const pulse = parseInt(pulseInput.value || '0'); // Default to 0 if empty
+            const notes = notesInput.value.trim();
+            const reading_date = readingDateInput.value; // Get the date value
+
+            // Client-side validation
+            if (isNaN(systolic) || isNaN(diastolic) || !reading_date) {
+                addReadingMessage.textContent = 'Please enter valid systolic, diastolic, and a date.';
+                addReadingMessage.classList.add('error');
+                return;
+            }
+
             try {
                 const response = await fetch('add_reading.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
                     },
-                    body: new URLSearchParams(newReading)
+                    body: new URLSearchParams({
+                        systolic: systolic,
+                        diastolic: diastolic,
+                        pulse: pulse,
+                        notes: notes,
+                        reading_date: reading_date // Include the date
+                    }).toString()
                 });
+
                 const data = await response.json();
+
                 if (data.success) {
-                    fetchAndDisplayReadings(); // Reload all displays after adding
-                    // Clear form fields
+                    addReadingMessage.textContent = data.message;
+                    addReadingMessage.classList.add('success');
+                    // Clear form fields after successful submission
                     systolicInput.value = '';
                     diastolicInput.value = '';
                     pulseInput.value = '';
                     notesInput.value = '';
+                    readingDateInput.valueAsDate = new Date(); // Reset date to today
+
+                    fetchAndDisplayReadings(); // Reload all data displays
                 } else {
-                    alert(data.message || 'Failed to save reading.');
+                    addReadingMessage.textContent = data.message || 'Failed to save reading.';
+                    addReadingMessage.classList.add('error');
                 }
             } catch (error) {
                 console.error('Error saving reading:', error);
-                alert('Failed to save reading due to a network error.');
+                addReadingMessage.textContent = 'An unexpected error occurred while saving. Please try again.';
+                addReadingMessage.classList.add('error');
             }
-        } else {
-            alert('Please enter valid systolic and diastolic readings.');
+        });
+    }
+
+    // --- Function to Delete a Reading ---
+    window.deleteReading = async function(readingId) {
+        if (!confirm('Are you sure you want to delete this reading?')) {
+            return;
         }
+
+        try {
+            const response = await fetch('delete_reading.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `id=${readingId}` // Send the ID of the reading to delete
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                console.log(data.message); // Log success
+                fetchAndDisplayReadings(); // Reload all data displays
+            } else {
+                alert(data.message || 'Failed to delete reading.');
+            }
+        } catch (error) {
+            console.error('Error deleting reading:', error);
+            alert('An unexpected error occurred while deleting. Please try again.');
+        }
+    };
+
+    // --- Event Listener for Logout Button ---
+    if (logoutButton) {
+        logoutButton.addEventListener('click', async function() {
+            if (confirm('Are you sure you want to log out?')) {
+                try {
+                    const response = await fetch('logout.php', {
+                        method: 'POST', // Use POST for logout to prevent CSRF via GET
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        }
+                    });
+                    const data = await response.json(); // Assuming logout.php returns JSON
+
+                    if (data.success) {
+                        window.location.href = 'login.html'; // Redirect to login page on successful logout
+                    } else {
+                        alert(data.message || 'Failed to log out.');
+                    }
+                } catch (error) {
+                    console.error('Error during logout:', error);
+                    alert('An error occurred during logout. Please try again.');
+                }
+            }
+        });
     }
 
     // --- Initial Load of Readings when the Page Loads ---
